@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -12,20 +12,38 @@ import {
 import {connect, useDispatch, useSelector} from 'react-redux';
 import {connectDevice} from '../redux/ble/bleAction';
 import DataActivityIndicator from './DataActivityIndicator';
-import {startScan} from '../redux';
+import {startScan, stopScan} from '../redux';
+import LoadingButton from '../components/button/loading';
 
 const BLEList = () => {
   const [isEnabled, setIsEnabled] = useState(false);
-
-  useEffect(() => {
-    dispatch(startScan());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  console.log(
+    '🚀 ~ file: screen.js ~ line 19 ~ BLEList ~ isEnabled',
+    isEnabled,
+  );
+  const fetchScan = useCallback(() => {
+    if (isEnabled === true) {
+      dispatch(stopScan());
+    } else {
+      dispatch(startScan());
+    }
+  }, [dispatch, isEnabled]);
+  // useEffect(() => {
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
   const dispatch = useDispatch();
   const devices = useSelector(state => state.bles.BLEList);
   const handleClick = device => {
     this.props.connectDevice(device);
     this.props.navigation.navigate('BLEServices');
+  };
+  const toggleSwitch = device => {
+    setIsEnabled(!isEnabled);
+    if (isEnabled === true) {
+      dispatch(stopScan());
+    } else {
+      dispatch(startScan());
+    }
   };
 
   const connectableString = item => {
@@ -48,23 +66,27 @@ const BLEList = () => {
           value={isEnabled}
         />
       </View>
-      <FlatList
-        data={devices}
-        renderItem={({item}) => (
-          <>
-            <TouchableHighlight
-              onPress={() => handleClick(item)}
-              style={item.isConnectable ? styles.rowFront : styles.rowBack}
-              underlayColor={'#AAA'}>
-              <View>
-                <Text>{connectableString(item)}</Text>
-              </View>
-            </TouchableHighlight>
-          </>
-        )}
-        keyExtractor={item => item.id.toString()}
-        ListEmptyComponent={DataActivityIndicator}
-      />
+      <View style={{}}>
+        <FlatList
+          contentContainerStyle={{}}
+          data={devices}
+          renderItem={({item}) => (
+            <>
+              <TouchableHighlight
+                onPress={() => handleClick(item)}
+                style={item.isConnectable ? styles.rowFront : styles.rowBack}
+                underlayColor={'#AAA'}>
+                <View>
+                  <Text>{connectableString(item)}</Text>
+                </View>
+              </TouchableHighlight>
+            </>
+          )}
+          keyExtractor={item => item.id.toString()}
+          ListEmptyComponent={DataActivityIndicator}
+        />
+      </View>
+      {/* <LoadingButton /> */}
     </SafeAreaView>
   );
 };
@@ -146,6 +168,20 @@ const styles = StyleSheet.create({
   trash: {
     height: 25,
     width: 25,
+  },
+  rowBluetooth: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: 'white',
+    marginTop: 24,
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    borderTopColor: '#E5E5E5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 16,
   },
 });
 

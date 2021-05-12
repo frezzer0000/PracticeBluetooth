@@ -51,6 +51,17 @@ export const startScan = () => {
     }, true);
   };
 };
+// export const stopScan = () => {
+//   return (dispatch, getState, DeviceManager) => {
+//     // you can use Device Manager here
+//     console.log('start Scanning');
+//     const subscription = DeviceManager.stopDeviceScan().then(() => {
+//       // Success code
+//       console.log('Scan stopped');
+//       subscription.remove();
+//     });
+//   };
+// };
 
 //on android device, we should ask permission
 const requestLocationPermission = async () => {
@@ -96,6 +107,19 @@ export const scan = () => {
       //TODO: here we could treat any new state or new thing when there's no permission to BLE
       console.log('Error permission');
     }
+  };
+};
+export const stopScan = () => {
+  return async (dispatch, getState, DeviceManager) => {
+    DeviceManager.stopDeviceScan(null, null, (error, device) => {
+      dispatch(changeStatus('Stop Scan'));
+      if (error) {
+        console.log(error);
+      }
+      if (device !== null) {
+        dispatch(addBLE(device));
+      }
+    });
   };
 };
 
