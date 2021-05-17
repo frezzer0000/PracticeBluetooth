@@ -9,42 +9,35 @@ import {
   SafeAreaView,
   Switch,
 } from 'react-native';
-import {connect, useDispatch, useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {connectDevice} from '../redux/ble/bleAction';
 import DataActivityIndicator from './DataActivityIndicator';
-import {startScan, stopScan} from '../redux';
-import LoadingButton from '../components/button/loading';
-
-const BLEList = () => {
+import {startScan, pauseScan} from '../redux';
+import BLE from './BLE';
+const BLEList = ({navigation}) => {
   const [isEnabled, setIsEnabled] = useState(false);
-  console.log(
-    '🚀 ~ file: screen.js ~ line 19 ~ BLEList ~ isEnabled',
-    isEnabled,
-  );
+
   const fetchScan = useCallback(() => {
-    if (isEnabled === true) {
-      dispatch(stopScan());
-    } else {
-      dispatch(startScan());
-    }
-  }, [dispatch, isEnabled]);
-  // useEffect(() => {
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+    dispatch(startScan());
+  }, [dispatch]);
+  useEffect(() => {
+    fetchScan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const dispatch = useDispatch();
   const devices = useSelector(state => state.bles.BLEList);
   const handleClick = device => {
-    this.props.connectDevice(device);
-    this.props.navigation.navigate('BLEServices');
+    dispatch(connectDevice(device));
+    navigation.navigate('Services');
   };
-  const toggleSwitch = device => {
-    setIsEnabled(!isEnabled);
-    if (isEnabled === true) {
-      dispatch(stopScan());
-    } else {
-      dispatch(startScan());
-    }
-  };
+  // const toggleSwitch = device => {
+  //   setIsEnabled(!isEnabled);
+  //   if (isEnabled === true) {
+  //     dispatch(pauseScan());
+  //   } else {
+  //     dispatch(startScan());
+  //   }
+  // };
 
   const connectableString = item => {
     if (item.isConnectable) {
@@ -56,7 +49,7 @@ const BLEList = () => {
 
   return (
     <SafeAreaView>
-      <View style={styles.rowBluetooth}>
+      {/* <View style={styles.rowBluetooth}>
         <Text>Bluetooth</Text>
         <Switch
           trackColor={{false: '#767577', true: '#21A567'}}
@@ -65,10 +58,9 @@ const BLEList = () => {
           onValueChange={toggleSwitch}
           value={isEnabled}
         />
-      </View>
+      </View> */}
       <View style={{}}>
         <FlatList
-          contentContainerStyle={{}}
           data={devices}
           renderItem={({item}) => (
             <>
@@ -86,7 +78,8 @@ const BLEList = () => {
           ListEmptyComponent={DataActivityIndicator}
         />
       </View>
-      {/* <LoadingButton /> */}
+
+      <BLE />
     </SafeAreaView>
   );
 };

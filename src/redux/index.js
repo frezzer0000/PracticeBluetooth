@@ -1,2 +1,2 @@
 export {fetchCountries} from './countries/countriesActions';
-export {startScan, stopScan} from './ble/bleAction';
+export {startScan, pauseScan} from './ble/bleAction';

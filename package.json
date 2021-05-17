@@ -15,6 +15,7 @@
     "@react-native-async-storage/async-storage": "react-native-async-storage/async-storage",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-navigation/native": "^5.9.4",
+    "@react-navigation/stack": "^5.14.5",
     "immutability-helper": "^3.1.1",
     "react": "17.0.1",
     "react-native": "0.64.1",
@@ -52,7 +53,9 @@
   },
   "config": {
     "react-native-storybook-loader": {
-      "searchDir": ["./src/components"],
+      "searchDir": [
+        "./src/components"
+      ],
       "pattern": "**/*.stories.js",
       "outputFile": "./storybook/storyLoader.js"
     }

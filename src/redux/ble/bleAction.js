@@ -1,4 +1,3 @@
-// import Base64 from '../Base64';
 import {PermissionsAndroid, Platform} from 'react-native';
 
 export const addBLE = device => ({
@@ -51,17 +50,18 @@ export const startScan = () => {
     }, true);
   };
 };
-// export const stopScan = () => {
-//   return (dispatch, getState, DeviceManager) => {
-//     // you can use Device Manager here
-//     console.log('start Scanning');
-//     const subscription = DeviceManager.stopDeviceScan().then(() => {
-//       // Success code
-//       console.log('Scan stopped');
-//       subscription.remove();
-//     });
-//   };
-// };
+export const pauseScan = () => {
+  return (dispatch, getState, DeviceManager) => {
+    // you can use Device Manager here
+    console.log('pause Scanning');
+    const subscription = DeviceManager.onStateChange(state => {
+      if (state === 'PoweredOff') {
+        dispatch(stopscan());
+        subscription.remove();
+      }
+    }, true);
+  };
+};
 
 //on android device, we should ask permission
 const requestLocationPermission = async () => {
@@ -109,10 +109,13 @@ export const scan = () => {
     }
   };
 };
-export const stopScan = () => {
+export const stopscan = () => {
   return async (dispatch, getState, DeviceManager) => {
+    // const permission =
+    //   Platform.OS === 'ios' ? true : await requestLocationPermission();
+    // if (permission) {
     DeviceManager.stopDeviceScan(null, null, (error, device) => {
-      dispatch(changeStatus('Stop Scan'));
+      dispatch(changeStatus('Stop Scanning'));
       if (error) {
         console.log(error);
       }
@@ -120,6 +123,10 @@ export const stopScan = () => {
         dispatch(addBLE(device));
       }
     });
+    // } else {
+    //   //TODO: here we could treat any new state or new thing when there's no permission to BLE
+    //   console.log('Error permission');
+    // }
   };
 };
 
@@ -183,3 +190,29 @@ function str2ab(str) {
   }
   return bufView;
 }
+
+export const writeCharacteristic = text => {
+  return (dispatch, getState, DeviceManager) => {
+    const state = getState();
+    let buffer = str2ab(text);
+    let packetsize = 20;
+    let offset = 0;
+    let packetlength = packetsize;
+    do {
+      if (offset + packetsize > buffer.length) {
+        packetlength = buffer.length;
+      } else {
+        packetlength = offset + packetsize;
+      }
+      // let packet = buffer.slice(offset, packetlength);
+      // console.log('packet: ', packet);
+      // let base64packet = Base64.btoa(String.fromCharCode.apply(null, packet));
+      // state.BLEs.connectedDevice.writeCharacteristicWithoutResponseForService(
+      //   state.BLEs.selectedService.uuid,
+      //   state.BLEs.selectedCharacteristic.uuid,
+      //   base64packet,
+      // );
+      offset += packetsize;
+    } while (offset < buffer.length);
+  };
+};
